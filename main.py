@@ -32,7 +32,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     number_of_habits = len(response.data)
     day_difference = day_calculator()
     
-    await update.message.reply_text(f"Welcome to the Enes' Habit Tracker.\n\nDay = {day_difference}\nNumber of Habits = {number_of_habits}\n\nPlease select what you want to do:\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit")
+    await update.message.reply_text(f"Welcome to the Enes' Habit Tracker.\n\nDay = {day_difference}\nNumber of Habits = {number_of_habits}\n\nPlease select what you want to do:\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit\n/update_streak")
     
 async def habit_dashboard(update: Update, context: ContextTypes.DEFAULT_TYPE):
     response = get_response()
@@ -53,6 +53,26 @@ async def habit_dashboard(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         habit_dashboard = "\n".join(lines)
         await update.message.reply_text(habit_dashboard)
+        
+        
+async def update_streak(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["mode"] = "select_update_streak"
+    response = get_response()
+    
+    lines = ["Here is all of your habits, please choose which one you want to update the streak of", ""]
+    
+    for i, habit in enumerate(response.data, start=1):
+        if habit["habit_structure"] == "weekly":
+            line = f"[{i}]: {habit['habit_name']} - {habit['weekly_streak']}/{habit['week_goal']}"
+        else:
+            line = f"[{i}]: {habit['habit_name']} - {habit['streak']}"
+
+        lines.append(line)
+
+    habit_dashboard = "\n".join(lines)
+    await update.message.reply_text(habit_dashboard)
+    
+    
     
 async def add_new_habit(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["mode"] = "add_new_habit"
@@ -65,6 +85,38 @@ async def add_new_habit(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "• **Weekly goal** (only if weekly)\n\n",
         parse_mode="Markdown"
 )
+    
+    
+async def handle_update_streak(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    response = get_response()
+    mode = context.user_data.get("mode")
+    text = (update.message.text or "").strip()
+    
+    if mode == "select_update_streak":
+        if not text.isdigit():
+            await update.message.reply_text("Please reply with a number.")
+            return
+        
+        selected = int(text) - 1
+        if selected < 0 or selected >= len(response.data):
+            await update.message.reply_text("Invalid number. Please pick a habit number from the list.")
+            return
+        
+        habit = response.data[selected]
+        context.user_data["mode"] = "update_streak_context"
+        context.user_data["habit_to_update"] = habit
+        
+        await update.message.reply_text(
+            f"What do you want to update the streak to: {habit['habit_name']}\n\n[1] Increase One\n[2] Decrease One\n[3] Increase Custom\n[4] Reset"
+        )
+        return
+    
+    if mode == "update_streak_context":
+        habit = context.user_data["habit_to_update"]
+        
+        
+        
+
     
 async def handle_add_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     mode = context.user_data.get("mode")
@@ -182,7 +234,6 @@ async def handle_delete_message(update: Update, context: ContextTypes.DEFAULT_TY
     
     context.user_data.pop("mode", None)
         
-
 
 async def handle_update_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     response = get_response()
