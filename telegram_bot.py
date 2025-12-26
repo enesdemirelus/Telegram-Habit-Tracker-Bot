@@ -258,7 +258,7 @@ async def handle_add_message(update: Update, context: ContextTypes.DEFAULT_TYPE)
             )
                 
         await update.message.reply_text(
-            f"A new habit has been added to your Habit Tracker:\n\n{lines[0]}\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit"
+            f"A new habit has been added to your Habit Tracker:\n\n{lines[0]}\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit\n/update_streak"
         )
     
     context.user_data.pop("mode", None)
@@ -335,10 +335,10 @@ async def handle_delete_message(update: Update, context: ContextTypes.DEFAULT_TY
             )
             
             await update.message.reply_text(
-                f"🗑️ Deleted: {habit['habit_name']}\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit"
+                f"🗑️ Deleted: {habit['habit_name']}\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit\n/update_streak"
             )
         else:
-            await update.message.reply_text(f"❌ Delete cancelled.\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit")
+            await update.message.reply_text(f"❌ Delete cancelled.\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit\n/update_streak")
 
     
     context.user_data.pop("mode", None)
@@ -394,7 +394,7 @@ async def handle_update_message(update: Update, context: ContextTypes.DEFAULT_TY
                 await update.message.reply_text(
                     "❌ Daily habits do not have a goal.\n\n"
                     "Only weekly habits can have a goal updated.\n\n"
-                    "/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit"
+                    "/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit\n/update_streak"
                 )
                 context.user_data.pop("mode", None)
                 return
@@ -428,7 +428,7 @@ async def handle_update_message(update: Update, context: ContextTypes.DEFAULT_TY
         supabase.table("Habits").update({"habit_name": new_name}).eq("habit_name", habit['habit_name']).execute()
 
         await update.message.reply_text(
-            f"Name of the habit:\n\n{habit['habit_name']} ➜ {new_name}\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit"
+            f"Name of the habit:\n\n{habit['habit_name']} ➜ {new_name}\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit\n/update_streak"
         )
 
         context.user_data.pop("mode", None)
@@ -446,7 +446,7 @@ async def handle_update_message(update: Update, context: ContextTypes.DEFAULT_TY
         supabase.table("Habits").update(update_data).eq("habit_name", habit['habit_name']).execute()
 
         await update.message.reply_text(
-            f"Habit structure will change from {habit['habit_structure']} ➜ {new_structure}.\n\nAll streaks will be reset.\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit"
+            f"Habit structure will change from {habit['habit_structure']} ➜ {new_structure}.\n\nAll streaks will be reset.\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit\n/update_streak"
         )
 
         context.user_data.pop("mode", None)
@@ -472,7 +472,7 @@ async def handle_update_message(update: Update, context: ContextTypes.DEFAULT_TY
         supabase.table("Habits").update({"week_goal": new_goal}).eq("habit_name", habit['habit_name']).execute()
 
         await update.message.reply_text(
-            f"New goal set for {habit['habit_name']}:\n\n{new_goal}\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit"
+            f"New goal set for {habit['habit_name']}:\n\n{new_goal}\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit\n/update_streak"
         )
 
         context.user_data.pop("mode", None)
@@ -488,10 +488,10 @@ async def handle_update_message(update: Update, context: ContextTypes.DEFAULT_TY
         if text == "yes":
             supabase.table("Habits").update({"streak": 0, "weekly_streak": 0}).eq("habit_name", habit['habit_name']).execute()
             await update.message.reply_text(
-                f"Streak for {habit['habit_name']} has been reset.\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit"
+                f"Streak for {habit['habit_name']} has been reset.\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit\n/update_streak"
             )
         else:
-            await update.message.reply_text(f"Reset cancelled.\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit")
+            await update.message.reply_text(f"Reset cancelled.\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit\n/update_streak")
 
         context.user_data.pop("mode", None)
 
