@@ -523,6 +523,7 @@ def main():
     app.add_handler(CommandHandler("add_new_habit", add_new_habit))
     app.add_handler(CommandHandler("delete_habit", delete_habit))
     app.add_handler(CommandHandler("update_habit", update_habit))
+    app.add_handler(CommandHandler("update_streak", update_streak))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
     app.run_polling()
         
