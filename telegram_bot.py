@@ -33,7 +33,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     number_of_habits = len(response.data)
     day_difference = day_calculator()
     
-    await update.message.reply_text(f"Welcome to the Enes' Habit Tracker.\n\nDay = {day_difference}\nNumber of Habits = {number_of_habits}\n\nPlease select what you want to do:\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit\n/update_streak")
+    await update.message.reply_text(f"Welcome to the Enes' Habit Tracker.\n\nDay = {day_difference}\nNumber of Habits = {number_of_habits}\n\nPlease select what you want to do:\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit")
     
 async def habit_dashboard(update: Update, context: ContextTypes.DEFAULT_TYPE):
     response = get_response()
@@ -98,7 +98,7 @@ async def handle_add_message(update: Update, context: ContextTypes.DEFAULT_TYPE)
             )
                 
         await update.message.reply_text(
-            f"A new habit has been added to your Habit Tracker:\n\n{lines[0]}\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit\n/update_streak"
+            f"A new habit has been added to your Habit Tracker:\n\n{lines[0]}\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit"
         )
     
     context.user_data.pop("mode", None)
@@ -175,10 +175,10 @@ async def handle_delete_message(update: Update, context: ContextTypes.DEFAULT_TY
             )
             
             await update.message.reply_text(
-                f"🗑️ Deleted: {habit['habit_name']}\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit\n/update_streak"
+                f"🗑️ Deleted: {habit['habit_name']}\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit"
             )
         else:
-            await update.message.reply_text(f"❌ Delete cancelled.\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit\n/update_streak")
+            await update.message.reply_text(f"❌ Delete cancelled.\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit")
 
     
     context.user_data.pop("mode", None)
@@ -235,7 +235,7 @@ async def handle_update_message(update: Update, context: ContextTypes.DEFAULT_TY
                 await update.message.reply_text(
                     "❌ Daily habits do not have a goal.\n\n"
                     "Only weekly habits can have a goal updated.\n\n"
-                    "/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit\n/update_streak"
+                    "/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit"
                 )
                 context.user_data.pop("mode", None)
                 return
@@ -269,7 +269,7 @@ async def handle_update_message(update: Update, context: ContextTypes.DEFAULT_TY
         supabase.table("Habits").update({"habit_name": new_name}).eq("habit_name", habit['habit_name']).execute()
 
         await update.message.reply_text(
-            f"Name of the habit:\n\n{habit['habit_name']} ➜ {new_name}\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit\n/update_streak"
+            f"Name of the habit:\n\n{habit['habit_name']} ➜ {new_name}\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit"
         )
 
         context.user_data.pop("mode", None)
@@ -287,7 +287,7 @@ async def handle_update_message(update: Update, context: ContextTypes.DEFAULT_TY
         supabase.table("Habits").update(update_data).eq("habit_name", habit['habit_name']).execute()
 
         await update.message.reply_text(
-            f"Habit structure will change from {habit['habit_structure']} ➜ {new_structure}.\n\nAll streaks will be reset.\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit\n/update_streak"
+            f"Habit structure will change from {habit['habit_structure']} ➜ {new_structure}.\n\nAll streaks will be reset.\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit"
         )
 
         context.user_data.pop("mode", None)
@@ -313,7 +313,7 @@ async def handle_update_message(update: Update, context: ContextTypes.DEFAULT_TY
         supabase.table("Habits").update({"week_goal": new_goal}).eq("habit_name", habit['habit_name']).execute()
 
         await update.message.reply_text(
-            f"New goal set for {habit['habit_name']}:\n\n{new_goal}\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit\n/update_streak"
+            f"New goal set for {habit['habit_name']}:\n\n{new_goal}\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit"
         )
 
         context.user_data.pop("mode", None)
@@ -329,84 +329,14 @@ async def handle_update_message(update: Update, context: ContextTypes.DEFAULT_TY
         if text == "yes":
             supabase.table("Habits").update({"streak": 0, "weekly_streak": 0}).eq("habit_name", habit['habit_name']).execute()
             await update.message.reply_text(
-                f"Streak for {habit['habit_name']} has been reset.\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit\n/update_streak"
+                f"Streak for {habit['habit_name']} has been reset.\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit"
             )
         else:
-            await update.message.reply_text(f"Reset cancelled.\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit\n/update_streak")
+            await update.message.reply_text(f"Reset cancelled.\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit")
 
         context.user_data.pop("mode", None)
 
-async def update_streak(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    response = get_response()
-    context.user_data["mode"] = "update_streak_pick"
-    
-    if len(response.data) == 0:
-        await update.message.reply_text("You do not have any habit. Please add a new habit below:\n\n/add_new_habit")
-        context.user_data.pop("mode", None)
-        return
-    
-    lines = ["Here is all of your habits, please choose which one you want to update the streak", ""]
-    
-    for i, habit in enumerate(response.data, start=1):
-        if habit["habit_structure"] == "weekly":
-            line = f"[{i}]: {habit['habit_name']} - {habit['weekly_streak']}/{habit['week_goal']}"
-        else:
-            line = f"[{i}]: {habit['habit_name']} - {habit['streak']}"
-        lines.append(line)
-    
-    habit_dashboard = "\n".join(lines)
-    await update.message.reply_text(habit_dashboard)
-
-async def handle_update_streak_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    response = get_response()
-    mode = context.user_data.get("mode")
-    text = (update.message.text or "").strip().lower()
-    
-    if mode == "update_streak_pick":
-        if not text.isdigit():
-            await update.message.reply_text("Please reply with a number.")
-            return
         
-        selected = int(text) - 1
-        if selected < 0 or selected >= len(response.data):
-            await update.message.reply_text("Invalid number. Please pick a habit number from the list.")
-            return
-        
-        habit = response.data[selected]
-        context.user_data["mode"] = "update_streak_action"
-        context.user_data["habit_to_update_streak"] = habit
-        
-        if habit["habit_structure"] == "weekly":
-            current_streak = habit['weekly_streak']
-        else:
-            current_streak = habit['streak']
-        
-        await update.message.reply_text(
-            f"Current streak for {habit['habit_name']}: {current_streak}\n\n[1] Increase by 1\n[2] Decrease by 1"
-        )
-        return
-    
-    if mode == "update_streak_action":
-        habit = context.user_data["habit_to_update_streak"]
-        
-        if text not in ("1", "2"):
-            await update.message.reply_text("Please reply with 1 (Increase) or 2 (Decrease).")
-            return
-        
-        if habit["habit_structure"] == "weekly":
-            current_streak = habit['weekly_streak']
-            new_streak = current_streak + 1 if text == "1" else max(0, current_streak - 1)
-            supabase.table("Habits").update({"weekly_streak": new_streak}).eq("habit_name", habit['habit_name']).execute()
-        else:
-            current_streak = habit['streak']
-            new_streak = current_streak + 1 if text == "1" else max(0, current_streak - 1)
-            supabase.table("Habits").update({"streak": new_streak}).eq("habit_name", habit['habit_name']).execute()
-        
-        await update.message.reply_text(
-            f"Streak updated for {habit['habit_name']}:\n\n{current_streak} ➜ {new_streak}\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit\n/update_streak"
-        )
-        
-        context.user_data.pop("mode", None)
 
 async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     mode = context.user_data.get("mode")
@@ -419,9 +349,6 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     if mode in ("update_pick", "update_context", "update_name", "update_structure", "update_goal", "reset_streak_confirm"):
         return await handle_update_message(update, context)
-    
-    if mode in ("update_streak_pick", "update_streak_action"):
-        return await handle_update_streak_message(update, context)
 
     return
     
@@ -434,7 +361,6 @@ def main():
     app.add_handler(CommandHandler("add_new_habit", add_new_habit))
     app.add_handler(CommandHandler("delete_habit", delete_habit))
     app.add_handler(CommandHandler("update_habit", update_habit))
-    app.add_handler(CommandHandler("update_streak", update_streak))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
     app.run_polling()
         
