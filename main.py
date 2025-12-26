@@ -114,8 +114,117 @@ async def handle_update_streak(update: Update, context: ContextTypes.DEFAULT_TYP
     if mode == "update_streak_context":
         habit = context.user_data["habit_to_update"]
         
+        if text == "1":
+            if habit["habit_structure"] == "weekly":
+                current_streak = habit.get("weekly_streak", 0)
+                if current_streak >= 7:
+                    await update.message.reply_text(
+                        f"❌ Weekly streak cannot exceed 7. Current streak: {current_streak}\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit\n/update_streak"
+                    )
+                    context.user_data.pop("mode", None)
+                    context.user_data.pop("habit_to_update", None)
+                    return
+                new_streak = min(7, current_streak + 1)
+                supabase.table("Habits").update({"weekly_streak": new_streak}).eq("habit_name", habit['habit_name']).execute()
+                await update.message.reply_text(
+                    f"✅ Streak increased for {habit['habit_name']}:\n\n{current_streak} ➜ {new_streak}\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit\n/update_streak"
+                )
+            else:
+                current_streak = habit.get("streak", 0)
+                new_streak = current_streak + 1
+                supabase.table("Habits").update({"streak": new_streak}).eq("habit_name", habit['habit_name']).execute()
+                await update.message.reply_text(
+                    f"✅ Streak increased for {habit['habit_name']}:\n\n{current_streak} ➜ {new_streak}\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit\n/update_streak"
+                )
+            context.user_data.pop("mode", None)
+            context.user_data.pop("habit_to_update", None)
+            return
         
+        elif text == "2":
+            if habit["habit_structure"] == "weekly":
+                current_streak = habit.get("weekly_streak", 0)
+                new_streak = max(0, current_streak - 1)
+                supabase.table("Habits").update({"weekly_streak": new_streak}).eq("habit_name", habit['habit_name']).execute()
+                await update.message.reply_text(
+                    f"✅ Streak decreased for {habit['habit_name']}:\n\n{current_streak} ➜ {new_streak}\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit\n/update_streak"
+                )
+            else:
+                current_streak = habit.get("streak", 0)
+                new_streak = max(0, current_streak - 1)
+                supabase.table("Habits").update({"streak": new_streak}).eq("habit_name", habit['habit_name']).execute()
+                await update.message.reply_text(
+                    f"✅ Streak decreased for {habit['habit_name']}:\n\n{current_streak} ➜ {new_streak}\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit\n/update_streak"
+                )
+            context.user_data.pop("mode", None)
+            context.user_data.pop("habit_to_update", None)
+            return
         
+        elif text == "3":
+            context.user_data["mode"] = "increase_custom"
+            await update.message.reply_text(
+                f"Enter the amount to increase the streak for {habit['habit_name']}:"
+            )
+            return
+        
+        elif text == "4":
+            if habit["habit_structure"] == "weekly":
+                supabase.table("Habits").update({"weekly_streak": 0}).eq("habit_name", habit['habit_name']).execute()
+                await update.message.reply_text(
+                    f"✅ Streak reset for {habit['habit_name']}:\n\nWeekly streak ➜ 0\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit\n/update_streak"
+                )
+            else:
+                supabase.table("Habits").update({"streak": 0}).eq("habit_name", habit['habit_name']).execute()
+                await update.message.reply_text(
+                    f"✅ Streak reset for {habit['habit_name']}:\n\nStreak ➜ 0\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit\n/update_streak"
+                )
+            context.user_data.pop("mode", None)
+            context.user_data.pop("habit_to_update", None)
+            return
+        
+        else:
+            await update.message.reply_text("Please reply with 1, 2, 3, or 4.")
+            return
+    
+    if mode == "increase_custom":
+        habit = context.user_data["habit_to_update"]
+        
+        if not text.isdigit():
+            await update.message.reply_text("Please enter a valid number.")
+            return
+        
+        increase_amount = int(text)
+        if increase_amount < 0:
+            await update.message.reply_text("Please enter a positive number.")
+            return
+        
+        if habit["habit_structure"] == "weekly":
+            current_streak = habit.get("weekly_streak", 0)
+            if current_streak >= 7:
+                await update.message.reply_text(
+                    f"❌ Weekly streak cannot exceed 7. Current streak: {current_streak}\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit\n/update_streak"
+                )
+                context.user_data.pop("mode", None)
+                context.user_data.pop("habit_to_update", None)
+                return
+            new_streak = min(7, current_streak + increase_amount)
+            supabase.table("Habits").update({"weekly_streak": new_streak}).eq("habit_name", habit['habit_name']).execute()
+            message = f"✅ Streak increased for {habit['habit_name']}:\n\n{current_streak} ➜ {new_streak} (+{increase_amount})"
+            if new_streak == 7 and increase_amount > (7 - current_streak):
+                message += f"\n\n⚠️ Capped at 7 (weekly maximum)"
+            await update.message.reply_text(
+                f"{message}\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit\n/update_streak"
+            )
+        else:
+            current_streak = habit.get("streak", 0)
+            new_streak = current_streak + increase_amount
+            supabase.table("Habits").update({"streak": new_streak}).eq("habit_name", habit['habit_name']).execute()
+            await update.message.reply_text(
+                f"✅ Streak increased for {habit['habit_name']}:\n\n{current_streak} ➜ {new_streak} (+{increase_amount})\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit\n/update_streak"
+            )
+        
+        context.user_data.pop("mode", None)
+        context.user_data.pop("habit_to_update", None)
+        return
 
     
 async def handle_add_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -149,7 +258,7 @@ async def handle_add_message(update: Update, context: ContextTypes.DEFAULT_TYPE)
             )
                 
         await update.message.reply_text(
-            f"A new habit has been added to your Habit Tracker:\n\n{lines[0]}\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit"
+            f"A new habit has been added to your Habit Tracker:\n\n{lines[0]}\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit\n/update_streak"
         )
     
     context.user_data.pop("mode", None)
@@ -226,10 +335,10 @@ async def handle_delete_message(update: Update, context: ContextTypes.DEFAULT_TY
             )
             
             await update.message.reply_text(
-                f"🗑️ Deleted: {habit['habit_name']}\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit"
+                f"🗑️ Deleted: {habit['habit_name']}\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit\n/update_streak"
             )
         else:
-            await update.message.reply_text(f"❌ Delete cancelled.\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit")
+            await update.message.reply_text(f"❌ Delete cancelled.\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit\n/update_streak")
 
     
     context.user_data.pop("mode", None)
@@ -285,7 +394,7 @@ async def handle_update_message(update: Update, context: ContextTypes.DEFAULT_TY
                 await update.message.reply_text(
                     "❌ Daily habits do not have a goal.\n\n"
                     "Only weekly habits can have a goal updated.\n\n"
-                    "/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit"
+                    "/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit\n/update_streak"
                 )
                 context.user_data.pop("mode", None)
                 return
@@ -319,7 +428,7 @@ async def handle_update_message(update: Update, context: ContextTypes.DEFAULT_TY
         supabase.table("Habits").update({"habit_name": new_name}).eq("habit_name", habit['habit_name']).execute()
 
         await update.message.reply_text(
-            f"Name of the habit:\n\n{habit['habit_name']} ➜ {new_name}\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit"
+            f"Name of the habit:\n\n{habit['habit_name']} ➜ {new_name}\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit\n/update_streak"
         )
 
         context.user_data.pop("mode", None)
@@ -337,7 +446,7 @@ async def handle_update_message(update: Update, context: ContextTypes.DEFAULT_TY
         supabase.table("Habits").update(update_data).eq("habit_name", habit['habit_name']).execute()
 
         await update.message.reply_text(
-            f"Habit structure will change from {habit['habit_structure']} ➜ {new_structure}.\n\nAll streaks will be reset.\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit"
+            f"Habit structure will change from {habit['habit_structure']} ➜ {new_structure}.\n\nAll streaks will be reset.\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit\n/update_streak"
         )
 
         context.user_data.pop("mode", None)
@@ -363,7 +472,7 @@ async def handle_update_message(update: Update, context: ContextTypes.DEFAULT_TY
         supabase.table("Habits").update({"week_goal": new_goal}).eq("habit_name", habit['habit_name']).execute()
 
         await update.message.reply_text(
-            f"New goal set for {habit['habit_name']}:\n\n{new_goal}\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit"
+            f"New goal set for {habit['habit_name']}:\n\n{new_goal}\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit\n/update_streak"
         )
 
         context.user_data.pop("mode", None)
@@ -379,10 +488,10 @@ async def handle_update_message(update: Update, context: ContextTypes.DEFAULT_TY
         if text == "yes":
             supabase.table("Habits").update({"streak": 0, "weekly_streak": 0}).eq("habit_name", habit['habit_name']).execute()
             await update.message.reply_text(
-                f"Streak for {habit['habit_name']} has been reset.\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit"
+                f"Streak for {habit['habit_name']} has been reset.\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit\n/update_streak"
             )
         else:
-            await update.message.reply_text(f"Reset cancelled.\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit")
+            await update.message.reply_text(f"Reset cancelled.\n\n/habit_dashboard\n/add_new_habit\n/delete_habit\n/update_habit\n/update_streak")
 
         context.user_data.pop("mode", None)
 
@@ -399,6 +508,9 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     if mode in ("update_pick", "update_context", "update_name", "update_structure", "update_goal", "reset_streak_confirm"):
         return await handle_update_message(update, context)
+    
+    if mode in ("select_update_streak", "update_streak_context", "increase_custom"):
+        return await handle_update_streak(update, context)
 
     return
     
@@ -411,6 +523,7 @@ def main():
     app.add_handler(CommandHandler("add_new_habit", add_new_habit))
     app.add_handler(CommandHandler("delete_habit", delete_habit))
     app.add_handler(CommandHandler("update_habit", update_habit))
+    app.add_handler(CommandHandler("update_streak", update_streak))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
     app.run_polling()
         
