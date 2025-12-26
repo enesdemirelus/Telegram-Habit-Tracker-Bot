@@ -1,6 +1,5 @@
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, ContextTypes, filters
-from dotenv import load_dotenv
 import os
 from supabase import create_client, Client
 from dotenv import load_dotenv
@@ -39,7 +38,7 @@ async def habit_dashboard(update: Update, context: ContextTypes.DEFAULT_TYPE):
     response = get_response()
     
     if len(response.data) == 0:
-        await update.message.reply_text("You do not have any habit. Pleasea add a new habit below:\n\n /add_new_habit")
+        await update.message.reply_text("You do not have any habit. Please add a new habit below:\n\n /add_new_habit")
     else:
         
         lines = ["Here is the dashboard of your habits 💪", ""]
